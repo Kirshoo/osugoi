@@ -26,6 +26,8 @@ func NewClient(baseURL string) *Client {
 	return &Client{
 		baseURL: baseURL,
 		httpAccess: &http.Client{},
+		accessToken: nil,
+		tokenType: nil,
 	}
 }
 
@@ -52,6 +54,8 @@ func (c *Client) Authenticate(clientId, clientSecret string) error {
 	}
 	defer resp.Body.Close()
 
+	// TODO: check response status code
+
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("response read failed: %w", err)
@@ -66,4 +70,18 @@ func (c *Client) Authenticate(clientId, clientSecret string) error {
 	c.tokenType = &credentials.TokenType
 	
 	return nil
+}
+
+func (c *Client) newRequest(method, path string, body io.Reader) (*http.Request, error) {
+	req, err := http.NewRequest(method, c.baseURL + path, body)
+	if err != nil {
+		return nil, fmt.Errorf("new request create failed: %w", err)
+	}
+
+	if c.accessToken != nil && c.tokenType != nil {
+		req.Header.Set("Authorization", fmt.Sprintf(
+			"%s %s", *c.tokenType, *c.accessToken))
+	}
+
+	return req, nil
 }
