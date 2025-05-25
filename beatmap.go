@@ -48,11 +48,10 @@ type Beatmap struct {
 	Owners *[]BeatmapOwner `json:"owners"`
 }
 
-func (c *Client) GetBeatmap(beatmapId int) (*Beatmap, error) {
-	req, err := c.newRequest(http.MethodGet, 
-		fmt.Sprintf("/api/v2/beatmaps/%d", beatmapId), nil)		
+func (c *Client) requestBeatmap(endpoint string) (*Beatmap, error) {
+	req, err := c.newRequest(http.MethodGet, endpoint, nil)		
 	if err != nil {
-		return nil, fmt.Errorf("create beatmap request failed: %w", err)
+		return nil, fmt.Errorf("create request failed: %w", err)
 	}
 
 	req.Header.Add("Accept", "application/json")
@@ -60,25 +59,25 @@ func (c *Client) GetBeatmap(beatmapId int) (*Beatmap, error) {
 	
 	resp, err := c.httpAccess.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("beatmap request failed: %w", err)
+		return nil, fmt.Errorf("server request failed: %w", err)
 	}
 	defer resp.Body.Close()
+	
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("response read failed: %w", err)
+	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		var errorMessage ErrorMessage
 		if err = json.Unmarshal(bodyBytes, &errorMessage); err != nil {
-			return fmt.Errorf("unmarshal failed: %w", err)
+			return nil, fmt.Errorf("unmarshal failed: %w", err)
 		}
 
-		return &HttpRequestError{
+		return nil, &HttpRequestError{
 			StatusCode: resp.StatusCode,
 			Message: &errorMessage,
 		}
-	}
-
-	bodyBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("response read failed: %w", err)
 	}
 
 	var beatmap Beatmap
@@ -87,4 +86,25 @@ func (c *Client) GetBeatmap(beatmapId int) (*Beatmap, error) {
 	}
 
 	return &beatmap, nil
+
+}
+
+// TODO: Add options for lookup (id, filename, etc.)
+func (c *Client) LookupBeatmap() (*Beatmap, error) {
+	beatmap, err := c.requestBeatmap("/api/v2/beatmaps/lookup")
+	if err != nil {
+		return beatmap, fmt.Errorf("lookup beatmap: %w", err)
+	}
+
+	return beatmap, err
+}
+
+// TODO: Change return type from Beatmap to ExtendedBeatmap
+func (c *Client) GetBeatmap(beatmapId int) (*Beatmap, error) {
+	beatmap, err := c.requestBeatmap(fmt.Sprintf("/api/v2/beatmaps/%d", beatmapId))
+	if err != nil {
+		return beatmap, fmt.Errorf("get beatmap: %w", err)
+	}
+
+	return beatmap, err
 }
