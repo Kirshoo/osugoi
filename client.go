@@ -54,11 +54,21 @@ func (c *Client) Authenticate(clientId, clientSecret string) error {
 	}
 	defer resp.Body.Close()
 
-	// TODO: check response status code
-
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("response read failed: %w", err)
+	}
+	
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		var errorMessage ErrorMessage
+		if err = json.Unmarshal(bodyBytes, &errorMessage); err != nil {
+			return fmt.Errorf("unmarshal failed: %w", err)
+		}
+
+		return &HttpRequestError{
+			StatusCode: resp.StatusCode,
+			Message: &errorMessage,
+		}
 	}
 
 	var credentials clientCredentials

@@ -64,7 +64,17 @@ func (c *Client) GetBeatmap(beatmapId int) (*Beatmap, error) {
 	}
 	defer resp.Body.Close()
 
-	// TODO: check response status code
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		var errorMessage ErrorMessage
+		if err = json.Unmarshal(bodyBytes, &errorMessage); err != nil {
+			return fmt.Errorf("unmarshal failed: %w", err)
+		}
+
+		return &HttpRequestError{
+			StatusCode: resp.StatusCode,
+			Message: &errorMessage,
+		}
+	}
 
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {

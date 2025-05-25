@@ -1,9 +1,9 @@
 package osugoi
 
 import (
-	"fmt"
 	"testing"
 	"os"
+	"log"
 
 	"github.com/joho/godotenv"
 )
@@ -13,7 +13,7 @@ var testClient *Client
 
 func TestMain(m *testing.M) {
 	if err := godotenv.Load(); err != nil {
-		fmt.Println("Warting: .env file not found or failed to load")
+		log.Println("Warting: .env file not found or failed to load")
 	}
 
 	testClient = NewClient(baseURL)
@@ -23,8 +23,7 @@ func TestMain(m *testing.M) {
 		os.Getenv("CLIENT_SECRET"),
 	)
 	if err != nil {
-		fmt.Errorf("Error creating client for testing: %w", err)
-		os.Exit(1)
+		log.Fatalf("Error creating client for testing: %v", err)
 	}
 
 	os.Exit(m.Run())
