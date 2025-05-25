@@ -8,6 +8,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
+const baseURL = "https://osu.ppy.sh"
+
 func TestMain(m *testing.M) {
 	if err := godotenv.Load(); err != nil {
 		fmt.Println("Warting: .env file not found or failed to load")
@@ -16,9 +18,11 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func TestNewClient(t *testing.T) {
-	_, err := NewClient()
-	if err != nil {
-		t.Errorf("No errors are expected. Got %v", err)
+func TestAuthenticate(t *testing.T) {
+	client := NewClient(baseURL)
+
+	if err := client.Authenticate(os.Getenv("CLIENT_ID"),
+			os.Getenv("CLIENT_SECRET")); err != nil {
+		t.Errorf("Authorize: unexpected error: %v", err)
 	}
 }
