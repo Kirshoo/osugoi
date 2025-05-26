@@ -18,16 +18,16 @@ type clientCredentials struct {
 type Client struct {
 	baseURL string
 	httpAccess *http.Client
-	accessToken *string
-	tokenType *string
+	accessToken string
+	tokenType string
 }
 
 func NewClient(baseURL string) *Client {
 	return &Client{
 		baseURL: baseURL,
 		httpAccess: &http.Client{},
-		accessToken: nil,
-		tokenType: nil,
+		accessToken: "",
+		tokenType: "",
 	}
 }
 
@@ -63,8 +63,8 @@ func (c *Client) Authenticate(clientId, clientSecret string) error {
 		return fmt.Errorf("unmarshal failed: %w", err)
 	}
 
-	c.accessToken = &credentials.AccessToken
-	c.tokenType = &credentials.TokenType
+	c.accessToken = credentials.AccessToken
+	c.tokenType = credentials.TokenType
 	
 	return nil
 }
@@ -75,9 +75,9 @@ func (c *Client) newRequest(method, path string, body io.Reader) (*http.Request,
 		return nil, fmt.Errorf("new request create failed: %w", err)
 	}
 
-	if c.accessToken != nil && c.tokenType != nil {
+	if c.accessToken != "" && c.tokenType != "" {
 		req.Header.Set("Authorization", fmt.Sprintf(
-			"%s %s", *c.tokenType, *c.accessToken))
+			"%s %s", c.tokenType, c.accessToken))
 	}
 
 	return req, nil
