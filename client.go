@@ -39,7 +39,7 @@ func (c *Client) Authenticate(clientId, clientSecret string) error {
 	data.Add("grant_type", "client_credentials")
 	data.Add("scope", "public")
 
-	req, err := http.NewRequest(http.MethodPost, c.baseURL + "/oauth/token",
+	req, err := c.newRequest(http.MethodPost, "/oauth/token",
 		bytes.NewBufferString(data.Encode()))
 	if err != nil {
 		return fmt.Errorf("create http request failed: %w", err)
@@ -52,25 +52,12 @@ func (c *Client) Authenticate(clientId, clientSecret string) error {
 	if err != nil {
 		return fmt.Errorf("server token request failed: %w", err)
 	}
-	defer resp.Body.Close()
 
-	bodyBytes, err := io.ReadAll(resp.Body)
+	bodyBytes, err := c.getValidResponseBody(resp)
 	if err != nil {
-		return fmt.Errorf("response read failed: %w", err)
+		return fmt.Errorf("invalid response: %w", err)
 	}
 	
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		var errorMessage ErrorMessage
-		if err = json.Unmarshal(bodyBytes, &errorMessage); err != nil {
-			return fmt.Errorf("unmarshal failed: %w", err)
-		}
-
-		return &HttpRequestError{
-			StatusCode: resp.StatusCode,
-			Message: &errorMessage,
-		}
-	}
-
 	var credentials clientCredentials
 	if err = json.Unmarshal(bodyBytes, &credentials); err != nil {
 		return fmt.Errorf("unmarshal failed: %w", err)
@@ -94,4 +81,27 @@ func (c *Client) newRequest(method, path string, body io.Reader) (*http.Request,
 	}
 
 	return req, nil
+}
+
+func (c *Client) getValidResponseBody(resp *http.Response) ([]byte, error) {
+	defer resp.Body.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return []byte{}, fmt.Errorf("response read failed: %w", err)
+	}
+	
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		var errorMessage ErrorMessage
+		if err = json.Unmarshal(bodyBytes, &errorMessage); err != nil {
+			return bodyBytes, fmt.Errorf("unmarshal failed: %w", err)
+		}
+
+		return bodyBytes, &HttpRequestError{
+			StatusCode: resp.StatusCode,
+			Message: &errorMessage,
+		}
+	}
+	
+	return bodyBytes, nil
 }

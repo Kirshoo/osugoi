@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"fmt"
-	"io"
 	"time"
 )
 
@@ -96,32 +95,14 @@ func (c *Client) GetRecentScores(ruleset Ruleset) (*[]Score, CursorString, error
 	query.Add("ruleset", string(ruleset))
 	req.URL.RawQuery = query.Encode()
 
-	// TODO: Better logging
-	// fmt.Printf("%+v\n", req)
-
 	resp, err := c.httpAccess.Do(req)
 	if err != nil {
 		return nil, "", fmt.Errorf("server request failed: %w", err)
 	}
-	defer resp.Body.Close()
 
-	bodyBytes, err := io.ReadAll(resp.Body)
+	bodyBytes, err := c.getValidResponseBody(resp)
 	if err != nil {
-		return nil, "", fmt.Errorf("response body read failed: %w", err)
-	}
-
-	// fmt.Println(string(bodyBytes[:1000]))
-
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		var errorMessage ErrorMessage
-		if err = json.Unmarshal(bodyBytes, &errorMessage); err != nil {
-			return nil, "", fmt.Errorf("unmarshal failed: %w", err)
-		}
-
-		return nil, "", &HttpRequestError{
-			StatusCode: resp.StatusCode,
-			Message: &errorMessage,
-		}
+		return nil, "", fmt.Errorf("invalid response: %w", err)
 	}
 
 	var scoreStruct scoreResponse

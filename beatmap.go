@@ -4,10 +4,8 @@ import (
 	"net/http"
 	"fmt"
 	"encoding/json"
-	"io"
 )
 
-// Ruleset enum
 type Ruleset string
 const (
 	Catch Ruleset = "fruits"
@@ -61,25 +59,12 @@ func (c *Client) requestBeatmap(endpoint string) (*Beatmap, error) {
 	if err != nil {
 		return nil, fmt.Errorf("server request failed: %w", err)
 	}
-	defer resp.Body.Close()
 	
-	bodyBytes, err := io.ReadAll(resp.Body)
+	bodyBytes, err := c.getValidResponseBody(resp)
 	if err != nil {
-		return nil, fmt.Errorf("response read failed: %w", err)
+		return nil, fmt.Errorf("invalid response: %w", err)
 	}
-
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		var errorMessage ErrorMessage
-		if err = json.Unmarshal(bodyBytes, &errorMessage); err != nil {
-			return nil, fmt.Errorf("unmarshal failed: %w", err)
-		}
-
-		return nil, &HttpRequestError{
-			StatusCode: resp.StatusCode,
-			Message: &errorMessage,
-		}
-	}
-
+	
 	var beatmap Beatmap
 	if err = json.Unmarshal(bodyBytes, &beatmap); err != nil {
 		return nil, fmt.Errorf("beatmap unmarshal failed: %w", err)
@@ -93,7 +78,7 @@ func (c *Client) requestBeatmap(endpoint string) (*Beatmap, error) {
 func (c *Client) LookupBeatmap() (*Beatmap, error) {
 	beatmap, err := c.requestBeatmap("/api/v2/beatmaps/lookup")
 	if err != nil {
-		return beatmap, fmt.Errorf("lookup beatmap: %w", err)
+		return beatmap, fmt.Errorf("lookup beatmap failed: %w", err)
 	}
 
 	return beatmap, err
@@ -103,7 +88,7 @@ func (c *Client) LookupBeatmap() (*Beatmap, error) {
 func (c *Client) GetBeatmap(beatmapId int) (*Beatmap, error) {
 	beatmap, err := c.requestBeatmap(fmt.Sprintf("/api/v2/beatmaps/%d", beatmapId))
 	if err != nil {
-		return beatmap, fmt.Errorf("get beatmap: %w", err)
+		return beatmap, fmt.Errorf("get beatmap failed: %w", err)
 	}
 
 	return beatmap, err
