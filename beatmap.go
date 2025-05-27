@@ -1,6 +1,12 @@
 package osugoi
 
 import (
+	// For OptsToQuery helper
+	"reflect"
+	"net/url"
+	"strings"
+	"strconv"
+
 	"net/http"
 	"fmt"
 	"encoding/json"
@@ -73,17 +79,100 @@ func (c *Client) requestBeatmap(endpoint string) (*Beatmap, error) {
 	}
 
 	return &beatmap, nil
-
 }
 
-// TODO: Add options for lookup (id, filename, etc.)
-func (c *Client) LookupBeatmap() (*Beatmap, error) {
-	beatmap, err := c.requestBeatmap("/api/v2/beatmaps/lookup")
-	if err != nil {
-		return beatmap, fmt.Errorf("lookup beatmap failed: %w", err)
+type LookupBeatmapOptions struct {
+	Id string
+	Filename string
+	Checksum string
+}
+
+type LookupBeatmapOption func(*LookupBeatmapOptions)
+
+func WithId(id int) LookupBeatmapOption {
+	return func(options *LookupBeatmapOptions) {
+		options.Id = strconv.Itoa(id)
+	}
+}
+
+func WithFilename(filename string) LookupBeatmapOption {
+	return func(options *LookupBeatmapOptions) {
+		options.Filename = filename
+	}
+}
+
+func WithChecksum(checksum string) LookupBeatmapOption {
+	return func(options *LookupBeatmapOptions) {
+		options.Checksum = checksum
+	}
+}
+
+// Helper to convert to valid raw query
+func LookupOptionsToQuery(opts LookupBeatmapOptions) url.Values {
+	v := reflect.ValueOf(opts)
+	t := reflect.TypeOf(opts)
+
+	values := url.Values{}
+
+	for i := 0; i < v.NumField(); i++ {
+		fieldValue := v.Field(i)
+		fieldType := t.Field(i)
+
+		key := strings.ToLower(fieldType.Name)
+
+		if fieldValue.IsZero() {
+			continue
+		}
+
+		values.Add(key, fieldValue.String())
 	}
 
-	return beatmap, err
+	return values
+}
+
+func (c *Client) LookupBeatmap(opts ...LookupBeatmapOption) (*Beatmap, error) {
+	if len(opts) == 0 {
+		return nil, fmt.Errorf("at least one option must be provided")
+	}
+
+	options := LookupBeatmapOptions{}
+	for _, opt := range opts {
+		opt(&options)
+	}
+
+	req, err := c.newRequest(http.MethodGet, "/api/v2/beatmaps/lookup", nil)		
+	if err != nil {
+		return nil, fmt.Errorf("create request failed: %w", err)
+	}
+
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+
+	req.URL.RawQuery = LookupOptionsToQuery(options).Encode()
+	
+	c.logger.Debug().
+		Str("options", fmt.Sprintf("%+v", options)).
+		Str("raw_query", req.URL.RawQuery).
+		Msg("Provided lookup options")
+	
+	resp, err := c.httpAccess.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("server request failed: %w", err)
+	}
+	
+	bodyBytes, err := c.getValidResponseBody(resp)
+	if err != nil {
+		return nil, fmt.Errorf("invalid response: %w", err)
+	}
+
+	c.logger.Trace().Str("rawResponse", string(bodyBytes)).Msg("Received body")
+	
+	var beatmap Beatmap
+	if err = json.Unmarshal(bodyBytes, &beatmap); err != nil {
+		return nil, fmt.Errorf("beatmap unmarshal failed: %w", err)
+	}
+
+	return &beatmap, nil
 }
 
 // TODO: Change return type from Beatmap to ExtendedBeatmap
