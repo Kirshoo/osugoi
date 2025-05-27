@@ -2,41 +2,48 @@ package osugoi
 
 import (
 	"testing"
-	"os"
-	"log"
-
-	"github.com/joho/godotenv"
+	"net/http"
+	"net/http/httptest"
 )
 
-const baseURL = "https://osu.ppy.sh"
-var testClient *Client
+func TestAuthenticateSuccess(t *testing.T) {
+	const (
+		testClientId string = "1111"
+		testClientSecret string = "abcdefg"
 
-func TestMain(m *testing.M) {
-	if err := godotenv.Load(); err != nil {
-		log.Println("Warting: .env file not found or failed to load")
+		expectedToken = "test-token"
+		expectedTokenType = "Bearer"
+	)
+
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/oauth/token" {
+			http.NotFound(w, r)
+			return
+		}
+
+		if r.Method != http.MethodPost {
+			http.NotFound(w, r)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"token_type":"Bearer", "expires_in":86400, "access_token":"test-token"}`))
+	}))
+	defer mockServer.Close()
+
+	client := NewClient(mockServer.URL)
+	err := client.Authenticate(testClientId, testClientSecret)
+	if err != nil {
+		t.Fatalf("Authorize: unexpected error: %v", err)
 	}
 
-	testClient = NewClient(baseURL)
-
-	err := testClient.Authenticate(
-		os.Getenv("CLIENT_ID"),
-		os.Getenv("CLIENT_SECRET"),
-	)
-	if err != nil {
-		log.Fatalf("Error creating client for testing: %v", err)
+	if client.tokenType != expectedTokenType {
+		t.Errorf("Inavlid access token type: expected '%s', got '%s'",
+			expectedTokenType, client.tokenType)
 	}
 
-	os.Exit(m.Run())
-}
-
-func TestAuthenticate(t *testing.T) {
-	client := NewClient(baseURL)
-
-	err := client.Authenticate(
-		os.Getenv("CLIENT_ID"),
-		os.Getenv("CLIENT_SECRET"),
-	)
-	if err != nil {
-		t.Errorf("Authorize: unexpected error: %v", err)
+	if client.accessToken != expectedToken {
+		t.Errorf("Inavlid access token type: expected '%s', got '%s'",
+			expectedToken, client.accessToken)
 	}
 }

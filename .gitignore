@@ -1,1 +1,4 @@
 .env
+
+# This is directory where the manual API requests are made
+manualTest/
