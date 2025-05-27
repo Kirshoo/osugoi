@@ -64,6 +64,8 @@ func (c *Client) requestBeatmap(endpoint string) (*Beatmap, error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid response: %w", err)
 	}
+
+	c.logger.Trace().Str("rawResponse", string(bodyBytes)).Msg("Received body")
 	
 	var beatmap Beatmap
 	if err = json.Unmarshal(bodyBytes, &beatmap); err != nil {

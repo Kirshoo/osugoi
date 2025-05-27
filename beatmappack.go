@@ -59,6 +59,8 @@ func (c *Client) GetBeatmapPacks() (*[]BeatmapPack, error) {
 		return nil, fmt.Errorf("invalid response: %w", err)
 	}
 
+	c.logger.Trace().Str("rawResponse", string(bodyBytes)).Msg("Received body")
+
 	var packs beatmapPacksResponse
 	if err = json.Unmarshal(bodyBytes, &packs); err != nil {
 		return nil, fmt.Errorf("unmarshal failed: %w", err)
@@ -87,6 +89,8 @@ func (c *Client) GetBeatmapPack(pack string) (*BeatmapPack, error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid response: %w", err)
 	}
+
+	c.logger.Trace().Str("rawResponse", string(bodyBytes)).Msg("Received body")
 
 	var beatmapPack BeatmapPack
 	if err = json.Unmarshal(bodyBytes, &beatmapPack); err != nil {

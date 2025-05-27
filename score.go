@@ -105,6 +105,8 @@ func (c *Client) GetRecentScores(ruleset Ruleset) (*[]Score, CursorString, error
 		return nil, "", fmt.Errorf("invalid response: %w", err)
 	}
 
+	c.logger.Trace().Str("rawResponse", string(bodyBytes)).Msg("Received body")
+
 	var scoreStruct scoreResponse
 	if err = json.Unmarshal(bodyBytes, &scoreStruct); err != nil {
 		return nil, "", fmt.Errorf("unmarshal failed: %w", err)

@@ -4,9 +4,12 @@ import (
 	"net/http"
 	"encoding/json"
 	"bytes"
+	"os"
 	"fmt"
 	"net/url"
 	"io"
+
+	"github.com/rs/zerolog"
 )
 
 type clientCredentials struct {
@@ -20,15 +23,30 @@ type Client struct {
 	httpAccess *http.Client
 	accessToken string
 	tokenType string
+
+	logger zerolog.Logger
 }
 
+// Defaults logger to be on info level and stdout
 func NewClient(baseURL string) *Client {
+	defaultLogger := zerolog.New(os.Stdout).
+		Level(zerolog.InfoLevel).
+		With().
+		Timestamp().
+		Logger()
+
+	return NewClientWithSpecialLogger(baseURL, defaultLogger)
+}
+
+func NewClientWithSpecialLogger(baseURL string, logger zerolog.Logger) *Client {
 	return &Client{
 		baseURL: baseURL,
 		httpAccess: &http.Client{},
 		accessToken: "",
 		tokenType: "",
+		logger: logger,
 	}
+
 }
 
 // Only for Client Credential Authentications for now
@@ -70,14 +88,16 @@ func (c *Client) Authenticate(clientId, clientSecret string) error {
 }
 
 func (c *Client) newRequest(method, path string, body io.Reader) (*http.Request, error) {
+	c.logger.Trace().Str("httpMethod", method).Str("path", path).Msg("Initiate new request")
+
 	req, err := http.NewRequest(method, c.baseURL + path, body)
 	if err != nil {
 		return nil, fmt.Errorf("new request create failed: %w", err)
 	}
 
 	if c.accessToken != "" && c.tokenType != "" {
-		req.Header.Set("Authorization", fmt.Sprintf(
-			"%s %s", c.tokenType, c.accessToken))
+		authString := fmt.Sprintf("%s %s", c.tokenType, c.accessToken)
+		req.Header.Set("Authorization", authString)
 	}
 
 	return req, nil
@@ -92,6 +112,7 @@ func (c *Client) getValidResponseBody(resp *http.Response) ([]byte, error) {
 	}
 	
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		c.logger.Warn().Int("statusCode", resp.StatusCode).Msg("API request")
 		var errorMessage ErrorMessage
 		if err = json.Unmarshal(bodyBytes, &errorMessage); err != nil {
 			return bodyBytes, fmt.Errorf("unmarshal failed: %w", err)
