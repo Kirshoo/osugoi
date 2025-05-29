@@ -10,6 +10,7 @@ import (
 	"io"
 
 	"github.com/rs/zerolog"
+	"github.com/Kirshoo/osugoi/internal/ratelimit"
 )
 
 type clientCredentials struct {
@@ -29,24 +30,61 @@ type Client struct {
 
 // Defaults logger to be on info level and stdout
 func NewClient(baseURL string) *Client {
-	defaultLogger := zerolog.New(os.Stdout).
-		Level(zerolog.InfoLevel).
-		With().
-		Timestamp().
-		Logger()
-
-	return NewClientWithSpecialLogger(baseURL, defaultLogger)
+	return NewClientWithConfig(baseURL, nil)
 }
 
-func NewClientWithSpecialLogger(baseURL string, logger zerolog.Logger) *Client {
-	return &Client{
-		baseURL: baseURL,
-		httpAccess: &http.Client{},
-		accessToken: "",
-		tokenType: "",
-		logger: logger,
+type ClientConfigurations struct {
+	Logger *zerolog.Logger
+	HttpClient *http.Client
+}
+
+type ClientConfig func(*ClientConfigurations)
+
+func WithLogger(logger zerolog.Logger) ClientConfig {
+	return func(conf *ClientConfigurations) {
+		conf.Logger = &logger
+	}	
+}
+
+func WithHttpClient(httpClient *http.Client) ClientConfig {
+	return func(conf *ClientConfigurations) {
+		conf.HttpClient = httpClient
+	}	
+}
+
+func NewClientWithConfig(baseURL string, configs ...ClientConfig) *Client {
+	var configurations ClientConfigurations
+	for _, config := range configs {
+		config(&configurations)
 	}
 
+	if configurations.HttpClient == nil {
+		limiter := ratelimit.NewTokenBucket(1, 2)
+
+		defaultClient := &http.Client{
+			Transport: &ratelimit.RateLimitedTransporter{
+				RateLimiter: limiter,
+			},
+		}
+
+		configurations.HttpClient = defaultClient
+	}
+
+	if configurations.Logger == nil {
+		defaultLogger := zerolog.New(os.Stdout).
+			Level(zerolog.InfoLevel).
+			With().
+			Timestamp().
+			Logger()
+
+		configurations.Logger = &defaultLogger
+	}
+
+	return &Client{
+		baseURL: baseURL,
+		httpAccess: configurations.HttpClient,
+		logger: *configurations.Logger,
+	}
 }
 
 // Only for Client Credential Authentications for now
