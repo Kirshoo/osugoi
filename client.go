@@ -166,6 +166,10 @@ func (c *Client) getValidResponseBody(resp *http.Response) ([]byte, error) {
 }
 
 func (c *Client) [T any]doGet(url string) (*T, error) {
+	return c.doGetWithQuery[T](url, url.Values{})
+}
+
+func (c *Client) [T any]doGetWithQuery(url, query url.Values) (*T, error) {
 	req, err := c.newRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create request: %w", err)
@@ -173,6 +177,8 @@ func (c *Client) [T any]doGet(url string) (*T, error) {
 
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
+
+	req.URL.RawQuery = query.Encode()
 
 	resp, err := c.httpAccess.Do(req)
 	if err != nil {
