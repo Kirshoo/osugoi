@@ -71,6 +71,10 @@ type Beatmapset struct {
 	TrackId *int `json:"track_id"`
 }
 
+type BeatmapsetExtended struct {
+	Beatmapset
+}
+
 type SearchBeatmapsetOptions struct {
 	Cursor CursorString
 	limit int

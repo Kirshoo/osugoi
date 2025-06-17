@@ -52,6 +52,17 @@ type Beatmap struct {
 	Owners *[]BeatmapOwner `json:"owners"`
 }
 
+type BeatmapExtended struct {
+	Beatmap
+}
+
+type BeatmapPlaycount struct {
+	BeatmapId int `json:"beatmap_id"`
+	Beatmap *Beatmap `json:"beatmap"`
+	Beatmapset *Beatmapset `json:"beatmapset"`
+	Count int `json:"count"`
+}
+
 func (c *Client) requestBeatmap(endpoint string) (*Beatmap, error) {
 	req, err := c.newRequest(http.MethodGet, endpoint, nil)		
 	if err != nil {
