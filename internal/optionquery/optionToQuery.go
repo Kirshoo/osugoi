@@ -25,6 +25,14 @@ func Convert[T any](options T) url.Values {
 			tag = strings.ToLower(fieldType.Name)
 		}
 
+		if fieldValue.Kind() == reflect.Slice {
+			for j := 0; j < fieldValue.Len(); j++ {
+				values.Add(tag, fieldValue.Index(j).String())
+			}
+
+			continue;
+		}
+
 		values.Add(tag, fieldValue.String())
 	}
 
