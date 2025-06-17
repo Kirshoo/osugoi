@@ -201,7 +201,7 @@ type BeatmapUserScore struct {
 	Score Score `json:"score"`
 }
 
-func (c *Client) GetUserScore(beatmapId, userId int) (*BeatmapUserScore, error) {
+func (c *Client) GetUserBeatmapScore(beatmapId, userId int) (*BeatmapUserScore, error) {
 	req, err := c.newRequest(
 		http.MethodGet, 
 		fmt.Sprintf("/api/v2/beatmaps/%d/scores/users/%d", beatmapId, userId),
@@ -239,7 +239,7 @@ type allUserScores struct {
 }
 
 // TODO: Query Parameters
-func (c *Client) GetUserScores(beatmapId, userId int) (*[]Score, error) {
+func (c *Client) GetUserBeatmapScores(beatmapId, userId int) (*[]Score, error) {
 	req, err := c.newRequest(
 		http.MethodGet, 
 		fmt.Sprintf("/api/v2/beatmaps/%d/scores/users/%d/all", beatmapId, userId),

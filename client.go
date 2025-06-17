@@ -165,12 +165,12 @@ func (c *Client) getValidResponseBody(resp *http.Response) ([]byte, error) {
 	return bodyBytes, nil
 }
 
-func (c *Client) [T any]doGet(url string) (*T, error) {
-	return c.doGetWithQuery[T](url, url.Values{})
+func (c *Client) doGetRaw(endpoint string) ([]byte, error) {
+	return c.doGetRawWithQuery(endpoint, url.Values{})
 }
 
-func (c *Client) [T any]doGetWithQuery(url, query url.Values) (*T, error) {
-	req, err := c.newRequest(http.MethodGet, url, nil)
+func (c *Client) doGetRawWithQuery(endpoint string, query url.Values) ([]byte, error) {
+	req, err := c.newRequest(http.MethodGet, endpoint, nil)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create request: %w", err)
 	}
@@ -179,6 +179,8 @@ func (c *Client) [T any]doGetWithQuery(url, query url.Values) (*T, error) {
 	req.Header.Add("Content-Type", "application/json")
 
 	req.URL.RawQuery = query.Encode()
+
+	c.logger.Trace().Str("raw_query", req.URL.RawQuery).Msg("Requesting")
 
 	resp, err := c.httpAccess.Do(req)
 	if err != nil {
@@ -192,10 +194,5 @@ func (c *Client) [T any]doGetWithQuery(url, query url.Values) (*T, error) {
 
 	c.logger.Trace().Str("raw", string(bodyBytes)).Msg("Received body")
 
-	var response T
-	if err = json.Unmarshal(bodyBytes, &response); err != nil {
-		return nil, fmt.Errorf("unable to unmarshal body: %w", err)
-	}
-
-	return &response, nil
+	return bodyBytes, nil
 }
