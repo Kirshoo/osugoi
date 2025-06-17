@@ -184,3 +184,79 @@ func (c *Client) GetBeatmap(beatmapId int) (*Beatmap, error) {
 
 	return beatmap, err
 }
+
+type BeatmapUserScore struct {
+	Position int `json:"position"`
+	Score Score `json:"score"`
+}
+
+func (c *Client) GetUserScore(beatmapId, userId int) (*BeatmapUserScore, error) {
+	req, err := c.newRequest(
+		http.MethodGet, 
+		fmt.Sprintf("/api/v2/beatmaps/%d/scores/users/%d", beatmapId, userId),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create a request: %w", err)
+	}
+
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+
+	resp, err := c.httpAccess.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("unable to receive response: %w", err)
+	}
+
+	bodyBytes, err := c.getValidResponseBody(resp)
+	if err != nil {
+		return nil, fmt.Errorf("invalid response: %w", err)
+	}
+
+	c.logger.Trace().Str("rawResponse", string(bodyBytes)).Msg("Received body")
+	
+	var userScore BeatmapUserScore
+	if err = json.Unmarshal(bodyBytes, &userScore); err != nil {
+		return nil, fmt.Errorf("userScore unmarshal failed: %w", err)
+	}
+
+	return &userScore, nil
+}
+
+type allUserScores struct {
+	Scores []Score `json:"scores"`
+}
+
+// TODO: Query Parameters
+func (c *Client) GetUserScores(beatmapId, userId int) (*[]Score, error) {
+	req, err := c.newRequest(
+		http.MethodGet, 
+		fmt.Sprintf("/api/v2/beatmaps/%d/scores/users/%d/all", beatmapId, userId),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create a request: %w", err)
+	}
+
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+
+	resp, err := c.httpAccess.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("unable to receive response: %w", err)
+	}
+
+	bodyBytes, err := c.getValidResponseBody(resp)
+	if err != nil {
+		return nil, fmt.Errorf("invalid response: %w", err)
+	}
+
+	c.logger.Trace().Str("rawResponse", string(bodyBytes)).Msg("Received body")
+	
+	var userScores allUserScores
+	if err = json.Unmarshal(bodyBytes, &userScores); err != nil {
+		return nil, fmt.Errorf("userScores unmarshal failed: %w", err)
+	}
+
+	return &userScores.Scores, nil
+}
