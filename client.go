@@ -28,11 +28,6 @@ type Client struct {
 	logger zerolog.Logger
 }
 
-// Defaults logger to be on info level and stdout
-func NewClient(baseURL string) *Client {
-	return NewClientWithConfig(baseURL, nil)
-}
-
 type ClientConfigurations struct {
 	Logger *zerolog.Logger
 	HttpClient *http.Client
@@ -52,7 +47,7 @@ func WithHttpClient(httpClient *http.Client) ClientConfig {
 	}	
 }
 
-func NewClientWithConfig(baseURL string, configs ...ClientConfig) *Client {
+func NewClient(baseURL string, configs ...ClientConfig) *Client {
 	var configurations ClientConfigurations
 	for _, config := range configs {
 		config(&configurations)
