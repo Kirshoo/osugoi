@@ -12,14 +12,6 @@ import (
 	"encoding/json"
 )
 
-type Ruleset string
-const (
-	Catch Ruleset = "fruits"
-	Mania Ruleset = "mania"
-	Standard Ruleset = "osu"
-	Taiko Ruleset = "taiko"
-)
-
 type Failtimes struct {
 	Exit *[]int `json:"exit"`
 	Fail *[]int `json:"fail"`

@@ -175,7 +175,7 @@ func (c *Client) doGetRawWithQuery(endpoint string, query url.Values) ([]byte, e
 
 	req.URL.RawQuery = query.Encode()
 
-	c.logger.Trace().Str("raw_query", req.URL.RawQuery).Msg("Requesting")
+	c.logger.Debug().Str("raw_query", req.URL.RawQuery).Msg("Requesting")
 
 	resp, err := c.httpAccess.Do(req)
 	if err != nil {
