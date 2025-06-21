@@ -31,7 +31,7 @@ After that, you will be able to import and use it inside your project.
 ### Beatmap Packs
 [x] Get Beatmap Packs  
 [x] Get Beatmap Pack (specified using pack id)  
-[ ] Optional query parameters  
+[x] Optional query parameters  
 
 ### Beatmaps
 [x] Lookup Beatmap  

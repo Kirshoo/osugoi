@@ -3,8 +3,9 @@ package osugoi
 import (
 	"time"
 	"fmt"
-	"net/http"
 	"encoding/json"
+
+	"github.com/Kirshoo/osugoi/internal/optionquery"
 )
 
 type BeatmapPackType string
@@ -39,63 +40,84 @@ type beatmapPacksResponse struct {
 	BeatmapPacks []BeatmapPack `json:"beatmap_packs"`
 }
 
-// TODO: Add options for search (BeamapPackType and Cursor)
-func (c *Client) GetBeatmapPacks() (*[]BeatmapPack, error) {
-	req, err := c.newRequest(http.MethodGet, "/api/v2/beatmaps/packs", nil)
-	if err != nil {
-		return nil, fmt.Errorf("create pack request failed: %w", err)
+type BeatmapPacksOptions struct {
+	Type BeatmapPackType `query:"type"`
+	Cursor CursorString `query:"cursor_string"`
+}
+type BeatmapPacksOption func(*BeatmapPacksOptions)
+
+func WithPackCursor(cursor CursorString) BeatmapPacksOption {
+	return func(options *BeatmapPacksOptions) {
+		options.Cursor = cursor
+	}
+}
+
+func WithPackType(packType BeatmapPackType) BeatmapPacksOption {
+	return func(options *BeatmapPacksOptions) {
+		options.Type = packType
+	}
+}
+
+func (c *Client) GetBeatmapPacks(opts ...BeatmapPacksOption) (*[]BeatmapPack, error) {
+	endpointURL := "/api/v2/beatmaps/packs"
+
+	options := BeatmapPacksOptions{
+		Type: StandardType,
 	}
 
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Content-Type", "application/json")
-
-	resp, err := c.httpAccess.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("server pack request failed: %w", err)
+	for _, opt := range opts {
+		opt(&options)
 	}
 
-	bodyBytes, err := c.getValidResponseBody(resp)
-	if err != nil {
-		return nil, fmt.Errorf("invalid response: %w", err)
-	}
+	query := optionquery.Convert(options)
 
-	c.logger.Trace().Str("rawResponse", string(bodyBytes)).Msg("Received body")
+	bodyBytes, err := c.doGetRawWithQuery(endpointURL, query)
+	if err != nil {
+		return nil, fmt.Errorf("error requesting: %w", err)
+	}
 
 	var packs beatmapPacksResponse
 	if err = json.Unmarshal(bodyBytes, &packs); err != nil {
-		return nil, fmt.Errorf("unmarshal failed: %w", err)
+		return nil, fmt.Errorf("unable to unmarshal: %w", err)
 	}
 
 	return &packs.BeatmapPacks, nil
 }
 
-// TODO: add legacy_only optional parameter
-func (c *Client) GetBeatmapPack(pack string) (*BeatmapPack, error) {
-	req, err := c.newRequest(http.MethodGet, 
-		fmt.Sprintf("/api/v2/beatmaps/packs/%s", pack), nil)
+type BeatmapPackOptions struct {
+	LegacyOnly int `query:"legacy_only"`
+}
+
+type BeatmapPackOption func(*BeatmapPackOptions)
+
+func LegacyOnly() BeatmapPackOption {
+	return func(options *BeatmapPackOptions) {
+		options.LegacyOnly = 1
+	}
+}
+
+func (c *Client) GetBeatmapPack(pack string, opts ...BeatmapPackOption) (*BeatmapPack, error) {
+	endpointURL := fmt.Sprintf("/api/v2/beatmaps/packs/%s", pack)
+
+	options := BeatmapPackOptions{
+		LegacyOnly: 0,
+	}
+
+	for _, opt := range opts {
+		opt(&options)
+	}
+
+	query := optionquery.Convert(options)
+
+	bodyBytes, err := c.doGetRawWithQuery(endpointURL, query)
 	if err != nil {
-		return nil, fmt.Errorf("create pack request failed: %w", err)
+		return nil, fmt.Errorf("error requesting: %w", err)
 	}
 
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Content-Type", "application/json")
-
-	resp, err := c.httpAccess.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("server pack request failed: %w", err)
+	var responsePack BeatmapPack
+	if err = json.Unmarshal(bodyBytes, &responsePack); err != nil {
+		return nil, fmt.Errorf("unable to unmarshal: %w", err)
 	}
 
-	bodyBytes, err := c.getValidResponseBody(resp)
-	if err != nil {
-		return nil, fmt.Errorf("invalid response: %w", err)
-	}
-
-	c.logger.Trace().Str("rawResponse", string(bodyBytes)).Msg("Received body")
-
-	var beatmapPack BeatmapPack
-	if err = json.Unmarshal(bodyBytes, &beatmapPack); err != nil {
-		return nil, fmt.Errorf("unmarshal failed: %w", err)
-	}
-
-	return &beatmapPack, nil
+	return &responsePack, nil
 }
