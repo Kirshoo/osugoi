@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"fmt"
 	"time"
+
+	"github.com/Kirshoo/osugoi/internal/optionquery"
 )
 
 type CursorString string
@@ -54,7 +56,7 @@ type Score struct {
 
 	// Currently not documented types :/
 	MaximumStatistics interface{} `json:"maximum_statistics"`
-	Mods []interface{} `json:"mods"`
+	Mods []Mod `json:"mods"`
 	Statistics interface{} `json:"statistics"`
 	
 	// Legacy fields
@@ -78,7 +80,7 @@ type Score struct {
 }
 
 type scoreResponse struct {
-	Scores *[]Score `json:"scores"`
+	Scores []Score `json:"scores"`
 	CursorString CursorString `json:"cursor_string"`
 }
 
@@ -112,5 +114,46 @@ func (c *Client) GetRecentScores(ruleset Ruleset) (*[]Score, CursorString, error
 		return nil, "", fmt.Errorf("unmarshal failed: %w", err)
 	}
 
-	return scoreStruct.Scores, scoreStruct.CursorString, nil
+	return &scoreStruct.Scores, scoreStruct.CursorString, nil
+}
+
+type GetScoresOptions struct {
+	Cursor CursorString `query:"cursor_string"`
+	Ruleset Ruleset `query:"ruleset"`
+}
+type GetScoresOption func(*GetScoresOptions)
+
+func WithRuleset(mode Ruleset) GetScoresOption {
+	return func(opts *GetScoresOptions) {
+		opts.Ruleset = mode
+	}
+}
+
+func WithCursor(cursor CursorString) GetScoresOption {
+	return func(opts *GetScoresOptions) {
+		opts.Cursor = cursor
+	}
+}
+
+func (c *Client) GetScores(opts ...GetScoresOption) (*[]Score, CursorString, error) {
+	endpointURL := "/api/v2/scores"
+
+	var options GetScoresOptions
+	for _, opt := range opts {
+		opt(&options)
+	}
+
+	query := optionquery.Convert(options)
+
+	bodyBytes, err := c.doGetRawWithQuery(endpointURL, query)
+	if err != nil {
+		return nil, "", fmt.Errorf("error requesting: %w", err)
+	}
+
+	var response scoreResponse
+	if err = json.Unmarshal(bodyBytes, &response); err != nil {
+		return nil, "", fmt.Errorf("unmarshal failed: %w", err)
+	}
+
+	return &response.Scores, response.CursorString, nil
 }
