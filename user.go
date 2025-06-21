@@ -169,7 +169,7 @@ func (c *Client) GetUserBeatmaps(userId int, beatmaps BeatmapsType) (*[]Beatmaps
 func (c *Client) GetUser(userId string, mode *Ruleset) (*UserExtended, error) {
 	endpointURL := fmt.Sprintf("/api/v2/users/%s", userId)
 	if mode != nil {
-		endpointURL = endpointURL + fmt.Sprintf("/%s", mode)
+		endpointURL = endpointURL + fmt.Sprintf("/%s", *mode)
 	}
 
 	body, err := c.doGetRaw(endpointURL)
