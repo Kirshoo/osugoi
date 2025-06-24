@@ -44,6 +44,10 @@ func New(baseURL string, tokenSrc auth.TokenSource, opts ...ClientConfig) *Clien
 	return c
 }
 
+func (c *Client) Logger() *zerolog.Logger {
+	return &c.logger
+}
+
 func (c *Client) NewRequest(ctx context.Context, method, path string, body any) (*http.Request, error) {
 	url := c.baseURL + path
 
@@ -62,7 +66,7 @@ func (c *Client) NewRequest(ctx context.Context, method, path string, body any) 
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	if token, err := c.tokenSource.Token(); err != nil {
+	if token, err := c.tokenSource.Token(); err == nil {
 		req.Header.Set("Authorization", token.Type + " " + token.AccessToken)
 	}
 
