@@ -24,25 +24,25 @@ After that, you will be able to import and use it inside your project.
 - Wiki
 
 ### Authentication
-[ ] Authorization Code Grant  
-[ ] Authorization Token Refresh  
+[x] Authorization Code Grant  
+[x] Authorization Token Refresh  
 [x] Client Credentials Grant  
 
 ### Beatmap Packs
-[x] Get Beatmap Packs  
-[x] Get Beatmap Pack (specified using pack id)  
-[x] Optional query parameters  
+[ ] Get Beatmap Packs  
+[ ] Get Beatmap Pack (specified using pack id)  
+[ ] Optional query parameters  
 
 ### Beatmaps
-[x] Lookup Beatmap  
-[x] Optional Lookup parameters  
-[x] Get a User Beatmap score  
-[x] Get a User Beatmap scores  
+[ ] Lookup Beatmap  
+[ ] Optional Lookup parameters  
+[ ] Get a User Beatmap score  
+[ ] Get a User Beatmap scores  
 [ ] Optional query parameters for user beatmap scores  
 [ ] Get top Beatmap scores  
 [ ] Get Beatmaps  
 [ ] Optional query parameters for Beatmaps  
-[x] Get Beatmap (specified by beatmap id)  
+[ ] Get Beatmap (specified by beatmap id)  
 [ ] Get Beatmap Attributes  
 
 ### Beatmapset Discussions
@@ -52,14 +52,14 @@ After that, you will be able to import and use it inside your project.
 [ ] Optional query parameters  
 
 ### Beatmapsets
-[x] Search Beatmapset  
-[x] Cursor String optional parameter  
+[ ] Search Beatmapset  
+[ ] Cursor String optional parameter  
 [ ] Lookup Beatmapset  
 [ ] Get Beatmapset  
 [ ] Download beatmapset  
 
 ### Scores
-[o] Get Scores  
+[ ] Get Scores  
 [ ] Reorder pinned score  
 [ ] Unpin score  
 [ ] Pin score  
@@ -67,10 +67,10 @@ After that, you will be able to import and use it inside your project.
 
 ### Users
 [ ] Get Own Data  
-[o] Get User Kudosu  
-[o] Get User Scores  
-[o] Get User Beatmaps  
+[ ] Get User Kudosu  
+[ ] Get User Scores  
+[ ] Get User Beatmaps  
 [ ] Get User recent activity  
-[o] Get User  
-[o] Get Users  
+[ ] Get User  
+[ ] Get Users  
 [ ] Optional query parameters  
