@@ -70,6 +70,6 @@ func (c *ClientCredentialsConfig) Token() (*Token, error) {
 	return &token, nil
 }
 
-func (c *ClientCredentialsConfig) Refresh(*Token) (*Token, error) {
+func (c *ClientCredentialsConfig) RefreshToken(*Token) (*Token, error) {
 	return c.Token()
 } 
