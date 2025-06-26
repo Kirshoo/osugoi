@@ -8,11 +8,12 @@ import (
 	"github.com/Kirshoo/osugoi/client"
 	"github.com/Kirshoo/osugoi/internal/optionquery"
 	"github.com/Kirshoo/osugoi/internal/options"
+	"github.com/Kirshoo/osugoi/common"
 )
 
 const baseBeatmapAPI string = "/api/v2/beatmaps"
 
-type Beatmaps struct {
+type BeatmapService struct {
 	Client *client.Client
 }
 
@@ -30,7 +31,7 @@ func assignOptions(opts []BeatmapOption, option *BeatmapOptions) error {
 	return nil
 }
 
-func (b *Beatmaps) Lookup(ctx context.Context, opts ...BeatmapOption) (*BeatmapExtended, error) {
+func (b *BeatmapService) Lookup(ctx context.Context, opts ...BeatmapOption) (*common.BeatmapExtended, error) {
 	allowedParameters := []string{"id", "checksum", "filename"}
 
 	if len(opts) == 0 {
@@ -56,7 +57,7 @@ func (b *Beatmaps) Lookup(ctx context.Context, opts ...BeatmapOption) (*BeatmapE
 
 	b.Client.Logger().Debug().Str("raw_query", req.URL.RawQuery).Msg("Request information")
 
-	var beatmap BeatmapExtended
+	var beatmap common.BeatmapExtended
 	if err = b.Client.Do(req, &beatmap); err != nil {
 		return nil, fmt.Errorf("performing request: %w", err)
 	}
@@ -64,7 +65,7 @@ func (b *Beatmaps) Lookup(ctx context.Context, opts ...BeatmapOption) (*BeatmapE
 	return &beatmap, nil
 }
 
-func (b *Beatmaps) Get(ctx context.Context, beatmapId int) (*BeatmapExtended, error) {
+func (b *BeatmapService) Get(ctx context.Context, beatmapId int) (*common.BeatmapExtended, error) {
 	endpointURL := fmt.Sprintf(baseBeatmapAPI + "/%d", beatmapId)
 
 	req, err := b.Client.NewRequest(ctx, http.MethodGet, endpointURL, nil)
@@ -72,7 +73,7 @@ func (b *Beatmaps) Get(ctx context.Context, beatmapId int) (*BeatmapExtended, er
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
 
-	var beatmap BeatmapExtended
+	var beatmap common.BeatmapExtended
 	if err = b.Client.Do(req, &beatmap); err != nil {
 		return nil, fmt.Errorf("performing request: %w", err)
 	}
@@ -81,10 +82,10 @@ func (b *Beatmaps) Get(ctx context.Context, beatmapId int) (*BeatmapExtended, er
 }
 
 type beatmapListResponse struct {
-	Beatmaps []BeatmapExtended `json:"beatmaps"`
+	Beatmaps []common.BeatmapExtended `json:"beatmaps"`
 }
 
-func (b *Beatmaps) List(ctx context.Context, opts ...BeatmapOption) (*[]BeatmapExtended, error) {
+func (b *BeatmapService) List(ctx context.Context, opts ...BeatmapOption) (*[]common.BeatmapExtended, error) {
 	endpointURL := baseBeatmapAPI
 	allowedParameters := []string{"ids[]"}
 
@@ -115,7 +116,7 @@ type attributesResponse struct {
 	Attributes DifficultyAttributes `json:"attributes"`
 }
 
-func (b *Beatmaps) GetAttributes(ctx context.Context, beatmapId int, opts ...BeatmapOption) (*DifficultyAttributes, error) {
+func (b *BeatmapService) GetAttributes(ctx context.Context, beatmapId int, opts ...BeatmapOption) (*DifficultyAttributes, error) {
 	endpointURL := fmt.Sprintf(baseBeatmapAPI + "/%d/attributes", beatmapId)
 	allowedParameters := []string{"mods", "ruleset", "ruleset_id"}
 
@@ -141,7 +142,7 @@ func (b *Beatmaps) GetAttributes(ctx context.Context, beatmapId int, opts ...Bea
 	return &response.Attributes, nil
 }
 
-func (b *Beatmaps) GetScores(ctx context.Context, beatmapId int, opts ...BeatmapOption) (*BeatmapScores, error) {
+func (b *BeatmapService) GetScores(ctx context.Context, beatmapId int, opts ...BeatmapOption) (*BeatmapScores, error) {
 	endpointURL := fmt.Sprintf(baseBeatmapAPI + "/%d/scores", beatmapId)
 	allowedParameters := []string{"legacy_only", "mode", "mods", "type"}
 
@@ -167,7 +168,7 @@ func (b *Beatmaps) GetScores(ctx context.Context, beatmapId int, opts ...Beatmap
 	return &scores, nil
 }
 
-func (b *Beatmaps) GetUserScore(ctx context.Context, beatmapId, userId int, opts ...BeatmapOption) (*BeatmapUserScore, error) {
+func (b *BeatmapService) GetUserScore(ctx context.Context, beatmapId, userId int, opts ...BeatmapOption) (*BeatmapUserScore, error) {
 	endpointURL := fmt.Sprintf(baseBeatmapAPI + "/%d/scores/users/%d", beatmapId, userId)
 	allowedParameters := []string{"legacy_only", "mode", "mods"}
 
@@ -192,10 +193,10 @@ func (b *Beatmaps) GetUserScore(ctx context.Context, beatmapId, userId int, opts
 }
 
 type allUserScores struct {
-	Scores []interface{} `json:"scores"`
+	Scores []common.Score `json:"scores"`
 }
 
-func (b *Beatmaps) GetAllUserScores(ctx context.Context, beatmapId, userId int, opts ...BeatmapOption) (*[]interface{}, error) {
+func (b *BeatmapService) GetAllUserScores(ctx context.Context, beatmapId, userId int, opts ...BeatmapOption) (*[]common.Score, error) {
 	endpointURL := fmt.Sprintf(baseBeatmapAPI + "/%d/scores/users/%d/all", beatmapId, userId)
 	allowedParameters := []string{"legacy_only", "ruleset"}
 

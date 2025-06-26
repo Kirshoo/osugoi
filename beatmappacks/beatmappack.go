@@ -12,7 +12,7 @@ import (
 
 const beatmapPacksBaseAPI string = "/api/v2/beatmaps/packs"
 
-type BeatmapPacks struct {
+type BeatmapPackService struct {
 	Client *client.Client
 }
 
@@ -30,7 +30,7 @@ func assignParameters(opts []BeatmapPackOption, option *BeatmapPackOptions) erro
 	return nil
 }
 
-func (bp *BeatmapPacks) Get(ctx context.Context, packTag string, opts ...BeatmapPackOption) (*BeatmapPack, error) {
+func (bp *BeatmapPackService) Get(ctx context.Context, packTag string, opts ...BeatmapPackOption) (*BeatmapPack, error) {
 	endpointURL := fmt.Sprintf(beatmapPacksBaseAPI + "/%s", packTag)
 	allowedParameters := []string{"legacy_only"}
 
@@ -60,7 +60,7 @@ type packListResponse struct {
 	Packs []BeatmapPack `json:"beatmap_packs"`
 }
 
-func (bp *BeatmapPacks) List(ctx context.Context, opts ...BeatmapPackOption) (*[]BeatmapPack, error) {
+func (bp *BeatmapPackService) List(ctx context.Context, opts ...BeatmapPackOption) (*[]BeatmapPack, error) {
 	endpointURL := beatmapPacksBaseAPI
 	allowedParameters := []string{"type", "cursor_string"}
 
