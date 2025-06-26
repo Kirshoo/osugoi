@@ -23,7 +23,7 @@ type Covers struct {
 
 type Nomination struct {
 	BeatmapsetId int `json:"beatmapset_id"`
-	Rulesets []Ruleset `json:"rulesets"`
+	Rulesets []common.Ruleset `json:"rulesets"`
 	Reset bool `json:"reset"`
 	UserId int `json:"user_id"`
 }
