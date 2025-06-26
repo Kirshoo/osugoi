@@ -61,11 +61,11 @@ After that, you will be able to import and use it inside your project.
 [x] Revoke current token
 
 ### Scores
-[ ] Get Scores  
+[x] Get Scores  
 [ ] Reorder pinned score  
 [ ] Unpin score  
 [ ] Pin score  
-[ ] Optional query parameters  
+[x] Optional query parameters  
 
 ### Users
 [ ] Get Own Data  
