@@ -105,7 +105,7 @@ func (c *Client) Do(req *http.Request, v any) error {
 // Not sure if context should be provided here, maybe create an option for it?
 // For now, will use exclusively context.Background()
 func (c *Client) RevokeToken() error {
-	endpointURL := "/oauth/tokens/current"
+	endpointURL := "/api/v2/oauth/tokens/current"
 
 	req, err := c.NewRequest(context.Background(), http.MethodDelete, endpointURL, nil)
 	if err != nil {
