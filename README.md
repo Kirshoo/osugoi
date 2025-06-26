@@ -19,7 +19,6 @@ After that, you will be able to import and use it inside your project.
 - Multiplayer
 - News
 - Notification
-- Revoke OAuth token
 - Ranking
 - Wiki
 
@@ -29,21 +28,21 @@ After that, you will be able to import and use it inside your project.
 [x] Client Credentials Grant  
 
 ### Beatmap Packs
-[ ] Get Beatmap Packs  
-[ ] Get Beatmap Pack (specified using pack id)  
-[ ] Optional query parameters  
+[x] Get Beatmap Packs  
+[x] Get Beatmap Pack (specified using pack id)  
+[x] Optional query parameters  
 
 ### Beatmaps
-[ ] Lookup Beatmap  
-[ ] Optional Lookup parameters  
-[ ] Get a User Beatmap score  
-[ ] Get a User Beatmap scores  
-[ ] Optional query parameters for user beatmap scores  
-[ ] Get top Beatmap scores  
-[ ] Get Beatmaps  
-[ ] Optional query parameters for Beatmaps  
-[ ] Get Beatmap (specified by beatmap id)  
-[ ] Get Beatmap Attributes  
+[x] Lookup Beatmap  
+[x] Optional Lookup parameters  
+[x] Get a User Beatmap score  
+[x] Get a User Beatmap scores  
+[x] Optional query parameters for user beatmap scores  
+[x] Get top Beatmap scores  
+[x] Get Beatmaps  
+[x] Optional query parameters for Beatmaps  
+[x] Get Beatmap (specified by beatmap id)  
+[x] Get Beatmap Attributes  
 
 ### Beatmapset Discussions
 [ ] Get Discussion Posts  
@@ -57,6 +56,9 @@ After that, you will be able to import and use it inside your project.
 [ ] Lookup Beatmapset  
 [ ] Get Beatmapset  
 [ ] Download beatmapset  
+
+### OAuth tokens
+[x] Revoke current token
 
 ### Scores
 [ ] Get Scores  

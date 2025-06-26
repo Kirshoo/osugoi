@@ -101,3 +101,23 @@ func (c *Client) Do(req *http.Request, v any) error {
 
 	return nil
 }
+
+// Not sure if context should be provided here, maybe create an option for it?
+// For now, will use exclusively context.Background()
+func (c *Client) RevokeToken() error {
+	endpointURL := "/oauth/tokens/current"
+
+	req, err := c.NewRequest(context.Background(), http.MethodDelete, endpointURL, nil)
+	if err != nil {
+		return fmt.Errorf("creating request: %w", err)
+	}
+
+	req.Header.Add("Accept", "application/json")
+
+	// Assume no response body
+	if err = c.Do(req, nil); err != nil {
+		return fmt.Errorf("performing request: %w", err)
+	}
+
+	return nil
+}
