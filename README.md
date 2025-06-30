@@ -1,12 +1,13 @@
-osugoi! is a small wrapper around public osu! API written in Go language.
+# osugoi!
+osugoi! is a small sdk for public osu! API written in Go language.
 
 ## Usage
-In order to use osugoi!, you will have to download:  
+Currently the only way to use this module is by cloning this repository
+and including the following in your go.mod
 ```
-go get github.com/Kirshoo/osugoi
-```  
-  
-After that, you will be able to import and use it inside your project.
+require github.com/Kirshoo/osugoi v0.0.0
+replace github.com/Kirshoo/osugoi => path/to/cloned/repo
+```
 
 ## API Coverage
 ### Yet to be covered
