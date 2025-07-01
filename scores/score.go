@@ -6,7 +6,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/Kirshoo/osugoi/client"
+	"github.com/Kirshoo/osugoi/transport"
 	"github.com/Kirshoo/osugoi/common"
 	"github.com/Kirshoo/ousgoi/internal/options"
 	"github.com/Kirshoo/ousgoi/internal/optionquery"
@@ -15,7 +15,7 @@ import (
 const baseScoresAPI = "/api/v2/scores"
 
 type ScoreService struct {
-	Client *client.Client
+	Transport *transport.Transport
 }
 
 func assignOptions(opts []ScoreOption, options *ScoreOptions) {
@@ -33,7 +33,7 @@ func (s *ScoreService) List(ctx context.Context, opts ...ScoreOption) (*[]common
 	endpointURL := baseScoresAPI
 	allowedParameters := []string{"ruleset", "cursor_string"}
 
-	req, err := s.Client.NewRequest(ctx, http.MethodGet, endpointURL, nil)
+	req, err := s.Transport.NewRequest(ctx, http.MethodGet, endpointURL, nil)
 	if err != nil {
 		return nil, nil, fmt.Errorf("creating request: %w", err)
 	}
@@ -48,7 +48,7 @@ func (s *ScoreService) List(ctx context.Context, opts ...ScoreOption) (*[]common
 	req.Header.Add("Accept", "application/json")
 
 	var response listScoresResponse
-	if err = s.Client.Do(req, &response); err != nil {
+	if err = s.Transport.Do(req, &response); err != nil {
 		return nil, nil, fmt.Errorf("performing request: %w", err)
 	}
 
@@ -64,7 +64,7 @@ func (s *ScoreService) Get(ctx context.Context, scoreId string) (*common.Score, 
 
 	endpointURL := fmt.Sprintf(baseScoresAPI + "/%s", scoreId)
 
-	req, err := s.Client.NewRequest(ctx, http.MethodGet, endpointURL, nil)
+	req, err := s.Transport.NewRequest(ctx, http.MethodGet, endpointURL, nil)
 	if err != nil {
 		return nil, nil, fmt.Errorf("creating request: %w", err)
 	}
@@ -72,7 +72,7 @@ func (s *ScoreService) Get(ctx context.Context, scoreId string) (*common.Score, 
 	req.Header.Add("Accept", "application/json")
 
 	var score common.Score
-	if err = s.Client.Do(req, &score); err != nil {
+	if err = s.Transport.Do(req, &score); err != nil {
 		return nil, nil, fmt.Errorf("performing request: %w", err)
 	}
 

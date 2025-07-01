@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"context"
 
-	"github.com/Kirshoo/osugoi/client"
+	"github.com/Kirshoo/osugoi/transport"
 	"github.com/Kirshoo/osugoi/internal/options"
 	"github.com/Kirshoo/osugoi/internal/optionquery"
 )
@@ -13,7 +13,7 @@ import (
 const beatmapPacksBaseAPI string = "/api/v2/beatmaps/packs"
 
 type BeatmapPackService struct {
-	Client *client.Client
+	Transport *transport.Transport
 }
 
 // Returns error only when option parameter is
@@ -34,7 +34,7 @@ func (bp *BeatmapPackService) Get(ctx context.Context, packTag string, opts ...B
 	endpointURL := fmt.Sprintf(beatmapPacksBaseAPI + "/%s", packTag)
 	allowedParameters := []string{"legacy_only"}
 
-	req, err := bp.Client.NewRequest(ctx, http.MethodGet, endpointURL, nil)
+	req, err := bp.Transport.NewRequest(ctx, http.MethodGet, endpointURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
@@ -49,7 +49,7 @@ func (bp *BeatmapPackService) Get(ctx context.Context, packTag string, opts ...B
 	req.Header.Add("Accept", "application/json")
 
 	var pack BeatmapPack
-	if err = bp.Client.Do(req, &pack); err != nil {
+	if err = bp.Transport.Do(req, &pack); err != nil {
 		return nil, fmt.Errorf("performing request: %w", err)
 	}
 
@@ -64,7 +64,7 @@ func (bp *BeatmapPackService) List(ctx context.Context, opts ...BeatmapPackOptio
 	endpointURL := beatmapPacksBaseAPI
 	allowedParameters := []string{"type", "cursor_string"}
 
-	req, err := bp.Client.NewRequest(ctx, http.MethodGet, endpointURL, nil)
+	req, err := bp.Transport.NewRequest(ctx, http.MethodGet, endpointURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
@@ -79,7 +79,7 @@ func (bp *BeatmapPackService) List(ctx context.Context, opts ...BeatmapPackOptio
 	req.Header.Add("Accept", "application/json")
 
 	var response packListResponse
-	if err = bp.Client.Do(req, &response); err != nil {
+	if err = bp.Transport.Do(req, &response); err != nil {
 		return nil, fmt.Errorf("performing request: %w", err)
 	}
 

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"context"
 
-	"github.com/Kirshoo/osugoi/client"
+	"github.com/Kirshoo/osugoi/transport"
 	"github.com/Kirshoo/osugoi/internal/optionquery"
 	"github.com/Kirshoo/osugoi/internal/options"
 	"github.com/Kirshoo/osugoi/common"
@@ -14,7 +14,7 @@ import (
 const baseBeatmapAPI string = "/api/v2/beatmaps"
 
 type BeatmapService struct {
-	Client *client.Client
+	Transport *transport.Transport
 }
 
 // Returns error only when option parameter is
@@ -40,7 +40,7 @@ func (b *BeatmapService) Lookup(ctx context.Context, opts ...BeatmapOption) (*co
 
 	endpointURL := baseBeatmapAPI + "/lookup"
 
-	req, err := b.Client.NewRequest(ctx, http.MethodGet, 
+	req, err := b.Transport.NewRequest(ctx, http.MethodGet, 
 			endpointURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
@@ -55,10 +55,10 @@ func (b *BeatmapService) Lookup(ctx context.Context, opts ...BeatmapOption) (*co
 	options.Filter(allowedParameters, &query)
 	req.URL.RawQuery = query.Encode()
 
-	b.Client.Logger().Debug().Str("raw_query", req.URL.RawQuery).Msg("Request information")
+	b.Transport.Logger().Debug().Str("raw_query", req.URL.RawQuery).Msg("Request information")
 
 	var beatmap common.BeatmapExtended
-	if err = b.Client.Do(req, &beatmap); err != nil {
+	if err = b.Transport.Do(req, &beatmap); err != nil {
 		return nil, fmt.Errorf("performing request: %w", err)
 	}
 
@@ -68,13 +68,13 @@ func (b *BeatmapService) Lookup(ctx context.Context, opts ...BeatmapOption) (*co
 func (b *BeatmapService) Get(ctx context.Context, beatmapId int) (*common.BeatmapExtended, error) {
 	endpointURL := fmt.Sprintf(baseBeatmapAPI + "/%d", beatmapId)
 
-	req, err := b.Client.NewRequest(ctx, http.MethodGet, endpointURL, nil)
+	req, err := b.Transport.NewRequest(ctx, http.MethodGet, endpointURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
 
 	var beatmap common.BeatmapExtended
-	if err = b.Client.Do(req, &beatmap); err != nil {
+	if err = b.Transport.Do(req, &beatmap); err != nil {
 		return nil, fmt.Errorf("performing request: %w", err)
 	}
 
@@ -89,7 +89,7 @@ func (b *BeatmapService) List(ctx context.Context, opts ...BeatmapOption) (*[]co
 	endpointURL := baseBeatmapAPI
 	allowedParameters := []string{"ids[]"}
 
-	req, err := b.Client.NewRequest(ctx, http.MethodGet, 
+	req, err := b.Transport.NewRequest(ctx, http.MethodGet, 
 			endpointURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
@@ -105,7 +105,7 @@ func (b *BeatmapService) List(ctx context.Context, opts ...BeatmapOption) (*[]co
 	req.URL.RawQuery = query.Encode()
 
 	var response beatmapListResponse
-	if err = b.Client.Do(req, &response); err != nil {
+	if err = b.Transport.Do(req, &response); err != nil {
 		return nil, fmt.Errorf("performing request: %w", err)
 	}
 
@@ -126,7 +126,7 @@ func (b *BeatmapService) GetAttributes(ctx context.Context, beatmapId int, opts 
 
 	options.Filter(allowedParameters, &data)
 
-	req, err := b.Client.NewRequest(ctx, http.MethodPost, 
+	req, err := b.Transport.NewRequest(ctx, http.MethodPost, 
 			endpointURL, data.Encode())
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
@@ -135,7 +135,7 @@ func (b *BeatmapService) GetAttributes(ctx context.Context, beatmapId int, opts 
 	req.Header.Add("Accept", "application/json")
 
 	var response attributesResponse
-	if err = b.Client.Do(req, &response); err != nil {
+	if err = b.Transport.Do(req, &response); err != nil {
 		return nil, fmt.Errorf("performing request: %w", err)
 	}
 
@@ -146,7 +146,7 @@ func (b *BeatmapService) GetScores(ctx context.Context, beatmapId int, opts ...B
 	endpointURL := fmt.Sprintf(baseBeatmapAPI + "/%d/scores", beatmapId)
 	allowedParameters := []string{"legacy_only", "mode", "mods", "type"}
 
-	req, err := b.Client.NewRequest(ctx, http.MethodGet, endpointURL, nil)
+	req, err := b.Transport.NewRequest(ctx, http.MethodGet, endpointURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
@@ -161,7 +161,7 @@ func (b *BeatmapService) GetScores(ctx context.Context, beatmapId int, opts ...B
 	req.URL.RawQuery = query.Encode()
 
 	var scores BeatmapScores
-	if err = b.Client.Do(req, &scores); err != nil {
+	if err = b.Transport.Do(req, &scores); err != nil {
 		return nil, fmt.Errorf("performing request: %w", err)
 	}
 
@@ -172,7 +172,7 @@ func (b *BeatmapService) GetUserScore(ctx context.Context, beatmapId, userId int
 	endpointURL := fmt.Sprintf(baseBeatmapAPI + "/%d/scores/users/%d", beatmapId, userId)
 	allowedParameters := []string{"legacy_only", "mode", "mods"}
 
-	req, err := b.Client.NewRequest(ctx, http.MethodGet, endpointURL, nil)
+	req, err := b.Transport.NewRequest(ctx, http.MethodGet, endpointURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
@@ -185,7 +185,7 @@ func (b *BeatmapService) GetUserScore(ctx context.Context, beatmapId, userId int
 	req.URL.RawQuery = query.Encode()
 
 	var userScore BeatmapUserScore
-	if err = b.Client.Do(req, &userScore); err != nil {
+	if err = b.Transport.Do(req, &userScore); err != nil {
 		return nil, fmt.Errorf("performing request: %w", err)
 	}
 
@@ -200,7 +200,7 @@ func (b *BeatmapService) GetAllUserScores(ctx context.Context, beatmapId, userId
 	endpointURL := fmt.Sprintf(baseBeatmapAPI + "/%d/scores/users/%d/all", beatmapId, userId)
 	allowedParameters := []string{"legacy_only", "ruleset"}
 
-	req, err := b.Client.NewRequest(ctx, http.MethodGet, endpointURL, nil)
+	req, err := b.Transport.NewRequest(ctx, http.MethodGet, endpointURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
@@ -213,7 +213,7 @@ func (b *BeatmapService) GetAllUserScores(ctx context.Context, beatmapId, userId
 	req.URL.RawQuery = query.Encode()
 
 	var userScores allUserScores
-	if err = b.Client.Do(req, &userScores); err != nil {
+	if err = b.Transport.Do(req, &userScores); err != nil {
 		return nil, fmt.Errorf("performing request: %w", err)
 	}
 

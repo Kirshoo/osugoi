@@ -1,4 +1,4 @@
-package client
+package transport
 
 import (
 	"net/http"
@@ -13,7 +13,7 @@ import (
 	"github.com/Kirshoo/osugoi/auth"
 )
 
-type Client struct {
+type Transport struct {
 	baseURL string
 	tokenSource auth.TokenSource
 
@@ -21,35 +21,35 @@ type Client struct {
 	logger zerolog.Logger
 }
 
-func New(baseURL string, tokenSrc auth.TokenSource, opts ...ClientConfig) *Client {
-	var options ClientConfigs
+func New(baseURL string, tokenSrc auth.TokenSource, opts ...TransportConfig) *Client {
+	var options TransportConfigs
 	for _, opt := range opts {
 		opt(&options)
 	}
 
-	c := &Client{baseURL: baseURL, tokenSource: tokenSrc}
+	t := &Transport{baseURL: baseURL, tokenSource: tokenSrc}
 
 	httpClient := options.httpClient
 	if httpClient == nil {
 		httpClient = DefaultHttpClient
 	}
-	c.network = httpClient
+	t.network = httpClient
 
 	logger := options.logger
 	if logger == nil {
 		logger = &DefaultLogger
 	}
-	c.logger = *logger
+	t.logger = *logger
 
 	return c
 }
 
-func (c *Client) Logger() *zerolog.Logger {
-	return &c.logger
+func (t *Transport) Logger() *zerolog.Logger {
+	return &t.logger
 }
 
-func (c *Client) NewRequest(ctx context.Context, method, path string, body any) (*http.Request, error) {
-	url := c.baseURL + path
+func (t *Transport) NewRequest(ctx context.Context, method, path string, body any) (*http.Request, error) {
+	url := t.baseURL + path
 
 	var buf io.Reader
 	if body != nil {
@@ -66,15 +66,15 @@ func (c *Client) NewRequest(ctx context.Context, method, path string, body any) 
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	if token, err := c.tokenSource.Token(); err == nil {
+	if token, err := t.tokenSource.Token(); err == nil {
 		req.Header.Set("Authorization", token.Type + " " + token.AccessToken)
 	}
 
 	return req, nil
 }
 
-func (c *Client) Do(req *http.Request, v any) error {
-	resp, err := c.network.Do(req)
+func (t *Transport) Do(req *http.Request, v any) error {
+	resp, err := t.network.Do(req)
 	if err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func (c *Client) Do(req *http.Request, v any) error {
 			return fmt.Errorf("error reading error body: %w", err)
 		}
 
-		c.logger.Warn().
+		t.logger.Warn().
 			Str("status", resp.Status).
 			Int("code", resp.StatusCode).
 			Str("body", strings.TrimSpace(string(bodyBytes))).
@@ -104,10 +104,10 @@ func (c *Client) Do(req *http.Request, v any) error {
 
 // Not sure if context should be provided here, maybe create an option for it?
 // For now, will use exclusively context.Background()
-func (c *Client) RevokeToken() error {
+func (t *Transport) RevokeToken() error {
 	endpointURL := "/api/v2/oauth/tokens/current"
 
-	req, err := c.NewRequest(context.Background(), http.MethodDelete, endpointURL, nil)
+	req, err := t.NewRequest(context.Background(), http.MethodDelete, endpointURL, nil)
 	if err != nil {
 		return fmt.Errorf("creating request: %w", err)
 	}
@@ -115,7 +115,7 @@ func (c *Client) RevokeToken() error {
 	req.Header.Add("Accept", "application/json")
 
 	// Assume no response body
-	if err = c.Do(req, nil); err != nil {
+	if err = t.Do(req, nil); err != nil {
 		return fmt.Errorf("performing request: %w", err)
 	}
 
