@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"fmt"
 	"context"
+	"strings"
 
 	"github.com/Kirshoo/osugoi/client"
 	"github.com/Kirshoo/osugoi/common"
@@ -52,4 +53,28 @@ func (s *ScoreService) List(ctx context.Context, opts ...ScoreOption) (*[]common
 	}
 
 	return &response.Scores, &response.Cursor, nil
+}
+
+// This is an undocumented endpoint and thus - is experimental
+func (s *ScoreService) Get(ctx context.Context, scoreId string) (*common.Score, error) {
+	var parameters ScoreOptions
+	for _, opt := range opts {
+		opt(&parameters)
+	}
+
+	endpointURL := fmt.Sprintf(baseScoresAPI + "/%s", scoreId)
+
+	req, err := s.Client.NewRequest(ctx, http.MethodGet, endpointURL, nil)
+	if err != nil {
+		return nil, nil, fmt.Errorf("creating request: %w", err)
+	}
+
+	req.Header.Add("Accept", "application/json")
+
+	var score common.Score
+	if err = s.Client.Do(req, &score); err != nil {
+		return nil, nil, fmt.Errorf("performing request: %w", err)
+	}
+
+	return &score, nil
 }
