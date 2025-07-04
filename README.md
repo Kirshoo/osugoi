@@ -1,8 +1,8 @@
 # osugoi!
 osugoi! is a small sdk for public osu! API written in Go language.
 
-## Usage
-Currently the only way to use this module is by cloning this repository
+## Installation
+Currently the only way to install this module is by cloning this repository
 and including the following in your go.mod
 ```
 require github.com/Kirshoo/osugoi v0.0.0
@@ -14,7 +14,6 @@ replace github.com/Kirshoo/osugoi => path/to/cloned/repo
 - Changelog
 - Chat
 - Comments
-- Events
 - Home
 - Matches
 - Multiplayer
@@ -52,20 +51,24 @@ replace github.com/Kirshoo/osugoi => path/to/cloned/repo
 [ ] Optional query parameters  
 
 ### Beatmapsets
-[ ] Search Beatmapset  
+[o] Search Beatmapset  
 [ ] Cursor String optional parameter  
-[ ] Lookup Beatmapset  
-[ ] Get Beatmapset  
-[ ] Download beatmapset  
+[x] Lookup Beatmapset  
+[x] Get Beatmapset  
+[!] Download beatmapset (This is osu!lazer specific and you cannot access this endpoint normally)
+
+### Events
+[x] List Events
+[x] Optional query parameters
 
 ### OAuth tokens
 [x] Revoke current token
 
 ### Scores
 [x] Get Scores  
-[ ] Reorder pinned score  
-[ ] Unpin score  
-[ ] Pin score  
+[!] Reorder pinned score (This is osu!lazer specific and you cannot access this endpoint notmally)
+[!] Unpin score (This is osu!lazer specific and you cannot access this endpoint notmally)
+[!] Pin score (This is osu!lazer specific and you cannot access this endpoint notmally)
 [x] Optional query parameters  
 
 ### Users
