@@ -61,3 +61,6 @@ type BeatmapExtended struct {
 	Convert bool `json:"convert"`
 }
 
+func (e *BeatmapExtended) IsExtended() bool {
+	return e.LastUpdatedAt.IsZero()
+}
