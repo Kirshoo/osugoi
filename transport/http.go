@@ -21,7 +21,7 @@ type Transport struct {
 	logger zerolog.Logger
 }
 
-func New(baseURL string, tokenSrc auth.TokenSource, opts ...TransportConfig) *Client {
+func New(baseURL string, tokenSrc auth.TokenSource, opts ...TransportConfig) *Transport {
 	var options TransportConfigs
 	for _, opt := range opts {
 		opt(&options)
@@ -41,7 +41,7 @@ func New(baseURL string, tokenSrc auth.TokenSource, opts ...TransportConfig) *Cl
 	}
 	t.logger = *logger
 
-	return c
+	return t
 }
 
 func (t *Transport) Logger() *zerolog.Logger {
