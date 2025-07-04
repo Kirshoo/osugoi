@@ -1,4 +1,4 @@
-package beatmappacks
+package common
 
 import (
 	"fmt"
@@ -90,27 +90,30 @@ func (t *BeatmapPackTag) UnmarshalJSON(data []byte) error {
 
 var (
 	StandardPackType BeatmapPackTagType = BeatmapPackTagType{Name: "standard", Tag: 'S'}
-	FeaturedArtistPackType BeatmapPackTagType = BeatmapPackTagType{Name: "featured", Tag: 'F'}
-	TournamentPackType BeatmapPackTagType = BeatmapPackTagType{Name: "tournament", Tag: 'P'}
-	LovedPackType BeatmapPackTagType = BeatmapPackTagType{Name: "loved", Tag: 'L'}
-	SpotlightPackType BeatmapPackTagType = BeatmapPackTagType{Name: "chart", Tag: 'R'}
-	ThemePackType BeatmapPackTagType = BeatmapPackTagType{Name: "theme", Tag: 'T'}
-	ArtistPackType BeatmapPackTagType = BeatmapPackTagType{Name: "artist", Tag: 'A'}
+	FeaturedArtistPackType = BeatmapPackTagType{Name: "featured", Tag: 'F'}
+	TournamentPackType = BeatmapPackTagType{Name: "tournament", Tag: 'P'}
+	LovedPackType = BeatmapPackTagType{Name: "loved", Tag: 'L'}
+	SpotlightPackType = BeatmapPackTagType{Name: "chart", Tag: 'R'}
+	ThemePackType = BeatmapPackTagType{Name: "theme", Tag: 'T'}
+	ArtistPackType = BeatmapPackTagType{Name: "artist", Tag: 'A'}
 )
 
 type BeatmapPack struct {
 	Author string `json:"author"`
 	Date time.Time `json:"date"`
 	Name string `json:"name"`
-	DiffReduction bool `json:"no_diff_reduction"`
-	RulesetId int `json:"ruleset_id"` // Possibly change to Ruleset type
+
+	// Whether difficulty reducing mods can be used
+	// in order to clear the pack (count towards pack completion)
+	NoDiffReduction bool `json:"no_diff_reduction"`
+	
+	RulesetId *int `json:"ruleset_id"` // Possibly change to Ruleset type
 	Tag BeatmapPackTag `json:"tag"`
 	DownloadUrl string `json:"url"`
 
 	// Optional attributes
 
-	// TODO: Add beatmapset type
-	// BeatmapSets *[]Beatmapset `json:"beatmapsets"`
+	Beatmapsets *[]BeatmapsetExtended `json:"beatmapsets"`
 	CompletedBeatmapsetIds []int `json:"user_completion_data.beatmapset_ids"`
 	IsCompleted bool `json:"user_completion_data.completed"`
 }
