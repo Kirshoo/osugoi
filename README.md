@@ -55,7 +55,7 @@ replace github.com/Kirshoo/osugoi => path/to/cloned/repo
 [ ] Cursor String optional parameter  
 [x] Lookup Beatmapset  
 [x] Get Beatmapset  
-[!] Download beatmapset (This is osu!lazer specific and you cannot access this endpoint normally)
+[!] Download beatmapset (This is osu!lazer specific and you cannot access this endpoint normally)  
 
 ### Events
 [x] List Events
@@ -66,9 +66,9 @@ replace github.com/Kirshoo/osugoi => path/to/cloned/repo
 
 ### Scores
 [x] Get Scores  
-[!] Reorder pinned score (This is osu!lazer specific and you cannot access this endpoint notmally)
-[!] Unpin score (This is osu!lazer specific and you cannot access this endpoint notmally)
-[!] Pin score (This is osu!lazer specific and you cannot access this endpoint notmally)
+[!] Reorder pinned score (This is osu!lazer specific and you cannot access this endpoint notmally)  
+[!] Unpin score (This is osu!lazer specific and you cannot access this endpoint notmally)  
+[!] Pin score (This is osu!lazer specific and you cannot access this endpoint notmally)  
 [x] Optional query parameters  
 
 ### Users
