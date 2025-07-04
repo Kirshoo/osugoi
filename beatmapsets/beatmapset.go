@@ -8,7 +8,7 @@ import (
 
 	"github.com/Kirshoo/osugoi/common"
 	"github.com/Kirshoo/osugoi/transport"
-	"github.com/Kirshoo/osugoi/optionquery"
+	"github.com/Kirshoo/osugoi/internal/optionquery"
 )
 
 const beatmapsetsBaseAPI string = "/api/v2/beatmapsets"

@@ -23,18 +23,13 @@ func assignOptions(opts []ScoreOption, options *ScoreOptions) {
 	}
 }
 
-type listScoresResponse struct {
-	Scores []common.Score `json:"scores"`
-	Cursor common.CursorString `json:"cursor_string"`
-}
-
-func (s *ScoreService) List(ctx context.Context, opts ...ScoreOption) (*[]common.Score, *common.CursorString, error) {
+func (s *ScoreService) List(ctx context.Context, opts ...ScoreOption) (*[]common.Score, common.CursorString, error) {
 	endpointURL := baseScoresAPI
 	allowedParameters := []string{"ruleset", "cursor_string"}
 
 	req, err := s.Transport.NewRequest(ctx, http.MethodGet, endpointURL, nil)
 	if err != nil {
-		return nil, nil, fmt.Errorf("creating request: %w", err)
+		return nil, "", fmt.Errorf("creating request: %w", err)
 	}
 
 	var parameters ScoreOptions
@@ -46,12 +41,15 @@ func (s *ScoreService) List(ctx context.Context, opts ...ScoreOption) (*[]common
 
 	req.Header.Add("Accept", "application/json")
 
-	var response listScoresResponse
-	if err = s.Transport.Do(req, &response); err != nil {
-		return nil, nil, fmt.Errorf("performing request: %w", err)
+	var list struct {
+		Scores []common.Score `json:"scores"`
+		Cursor common.CursorString `json:"cursor_string"`
+	}
+	if err = s.Transport.Do(req, &list); err != nil {
+		return nil, "", fmt.Errorf("performing request: %w", err)
 	}
 
-	return &response.Scores, &response.Cursor, nil
+	return &list.Scores, list.Cursor, nil
 }
 
 // This is an undocumented endpoint and thus - is experimental

@@ -6,6 +6,7 @@ import (
 	"context"
 
 	"github.com/Kirshoo/osugoi/transport"
+	"github.com/Kirshoo/osugoi/common"
 	"github.com/Kirshoo/osugoi/internal/options"
 	"github.com/Kirshoo/osugoi/internal/optionquery"
 )
@@ -30,7 +31,7 @@ func assignParameters(opts []BeatmapPackOption, option *BeatmapPackOptions) erro
 	return nil
 }
 
-func (bp *BeatmapPackService) Get(ctx context.Context, packTag string, opts ...BeatmapPackOption) (*BeatmapPack, error) {
+func (bp *BeatmapPackService) Get(ctx context.Context, packTag string, opts ...BeatmapPackOption) (*common.BeatmapPack, error) {
 	endpointURL := fmt.Sprintf(beatmapPacksBaseAPI + "/%s", packTag)
 	allowedParameters := []string{"legacy_only"}
 
@@ -48,7 +49,7 @@ func (bp *BeatmapPackService) Get(ctx context.Context, packTag string, opts ...B
 
 	req.Header.Add("Accept", "application/json")
 
-	var pack BeatmapPack
+	var pack common.BeatmapPack
 	if err = bp.Transport.Do(req, &pack); err != nil {
 		return nil, fmt.Errorf("performing request: %w", err)
 	}
@@ -56,17 +57,13 @@ func (bp *BeatmapPackService) Get(ctx context.Context, packTag string, opts ...B
 	return &pack, nil
 }
 
-type packListResponse struct {
-	Packs []BeatmapPack `json:"beatmap_packs"`
-}
-
-func (bp *BeatmapPackService) List(ctx context.Context, opts ...BeatmapPackOption) (*[]BeatmapPack, error) {
+func (bp *BeatmapPackService) List(ctx context.Context, opts ...BeatmapPackOption) (*[]common.BeatmapPack, common.CursorString, error) {
 	endpointURL := beatmapPacksBaseAPI
 	allowedParameters := []string{"type", "cursor_string"}
 
 	req, err := bp.Transport.NewRequest(ctx, http.MethodGet, endpointURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("creating request: %w", err)
+		return nil, "", fmt.Errorf("creating request: %w", err)
 	}
 
 	parameters := BeatmapPackOptions{}
@@ -78,10 +75,13 @@ func (bp *BeatmapPackService) List(ctx context.Context, opts ...BeatmapPackOptio
 
 	req.Header.Add("Accept", "application/json")
 
-	var response packListResponse
-	if err = bp.Transport.Do(req, &response); err != nil {
-		return nil, fmt.Errorf("performing request: %w", err)
+	var list struct {
+		Packs []common.BeatmapPack `json:"beatmap_packs"`
+		Cursor common.CursorString `json:"cursor_string"`
+	}
+	if err = bp.Transport.Do(req, &list); err != nil {
+		return nil, "", fmt.Errorf("performing request: %w", err)
 	}
 
-	return &response.Packs, nil
+	return &list.Packs, list.Cursor, nil
 }

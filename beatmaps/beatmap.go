@@ -81,10 +81,6 @@ func (b *BeatmapService) Get(ctx context.Context, beatmapId int) (*common.Beatma
 	return &beatmap, nil
 }
 
-type beatmapListResponse struct {
-	Beatmaps []common.BeatmapExtended `json:"beatmaps"`
-}
-
 func (b *BeatmapService) List(ctx context.Context, opts ...BeatmapOption) (*[]common.BeatmapExtended, error) {
 	endpointURL := baseBeatmapAPI
 	allowedParameters := []string{"ids[]"}
@@ -104,16 +100,14 @@ func (b *BeatmapService) List(ctx context.Context, opts ...BeatmapOption) (*[]co
 	options.Filter(allowedParameters, &query)
 	req.URL.RawQuery = query.Encode()
 
-	var response beatmapListResponse
+	var response struct {
+		Beatmaps []common.BeatmapExtended `json:"beatmaps"`
+	}
 	if err = b.Transport.Do(req, &response); err != nil {
 		return nil, fmt.Errorf("performing request: %w", err)
 	}
 
 	return &response.Beatmaps, nil
-}
-
-type attributesResponse struct {
-	Attributes DifficultyAttributes `json:"attributes"`
 }
 
 func (b *BeatmapService) GetAttributes(ctx context.Context, beatmapId int, opts ...BeatmapOption) (*DifficultyAttributes, error) {
@@ -134,12 +128,14 @@ func (b *BeatmapService) GetAttributes(ctx context.Context, beatmapId int, opts 
 
 	req.Header.Add("Accept", "application/json")
 
-	var response attributesResponse
-	if err = b.Transport.Do(req, &response); err != nil {
+	var attributes struct {
+		Value DifficultyAttributes `json:"attributes"`
+	}
+	if err = b.Transport.Do(req, &attributes); err != nil {
 		return nil, fmt.Errorf("performing request: %w", err)
 	}
 
-	return &response.Attributes, nil
+	return &attributes.Value, nil
 }
 
 func (b *BeatmapService) GetScores(ctx context.Context, beatmapId int, opts ...BeatmapOption) (*BeatmapScores, error) {
@@ -192,10 +188,6 @@ func (b *BeatmapService) GetUserScore(ctx context.Context, beatmapId, userId int
 	return &userScore, nil
 }
 
-type allUserScores struct {
-	Scores []common.Score `json:"scores"`
-}
-
 func (b *BeatmapService) GetAllUserScores(ctx context.Context, beatmapId, userId int, opts ...BeatmapOption) (*[]common.Score, error) {
 	endpointURL := fmt.Sprintf(baseBeatmapAPI + "/%d/scores/users/%d/all", beatmapId, userId)
 	allowedParameters := []string{"legacy_only", "ruleset"}
@@ -212,7 +204,9 @@ func (b *BeatmapService) GetAllUserScores(ctx context.Context, beatmapId, userId
 	options.Filter(allowedParameters, &query)
 	req.URL.RawQuery = query.Encode()
 
-	var userScores allUserScores
+	var userScores struct {
+		Scores []common.Score `json:"scores"`
+	}
 	if err = b.Transport.Do(req, &userScores); err != nil {
 		return nil, fmt.Errorf("performing request: %w", err)
 	}

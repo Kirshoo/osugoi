@@ -15,13 +15,13 @@ func LegacyOnly() BeatmapPackOption {
 	}
 }
 
-func WithType(packType BeatmapPackTagType) BeatmapPackOption {
+func WithType(packType common.BeatmapPackTagType) BeatmapPackOption {
 	return func(opts *BeatmapPackOptions) {
 		opts.PackType = packType.Name
 	}
 }
 
-func WithCursorString(cursor common.CursorString) BeatmapPackOption {
+func WithCursor(cursor common.CursorString) BeatmapPackOption {
 	return func(opts *BeatmapPackOptions) {
 		opts.Cursor = cursor
 	}

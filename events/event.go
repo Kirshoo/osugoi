@@ -17,11 +17,6 @@ type EventService struct {
 	Transport *transport.Transport
 }
 
-type listEventResponse struct {
-	Events []Event `json:"events"`
-	Cursor common.CursorString `json:"cursor_string"`
-}
-
 func (e *EventService) List(ctx context.Context, opts ...EventOption) (*[]Event, common.CursorString, error) {
 	endpointURL := baseEventAPI
 
@@ -39,10 +34,13 @@ func (e *EventService) List(ctx context.Context, opts ...EventOption) (*[]Event,
 	req.URL.RawQuery = query.Encode()
 	req.Header.Add("Accept", "application/json")
 
-	var response listEventResponse
-	if err = e.Transport.Do(req, &response); err != nil {
+	var list struct {
+		Events []Event `json:"events"`
+		Cursor common.CursorString `json:"cursor_string"`
+	}
+	if err = e.Transport.Do(req, &list); err != nil {
 		return nil, "", fmt.Errorf("performing request: %w", err)
 	}
 
-	return &response.Events, response.Cursor, nil
+	return &list.Events, list.Cursor, nil
 }
