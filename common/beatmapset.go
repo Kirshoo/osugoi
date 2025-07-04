@@ -1,5 +1,7 @@
 package common
 
+import "time"
+
 // Collection of links to image used in a cover
 type CoverLinks struct {
 	Card string `json:"card"`
@@ -62,9 +64,8 @@ type Beatmapset struct {
 	GenreId int `json:"genre_id"`
 	LanguageId int `json:"language_id"`
 
-	// Docs have has_favourite as an optional field
-	// In my testing its replaced with favourite_count instead
-	FavouriteCount int `json:"favourite_count"`
+	// Docs have has_favourite as an optional field, but I
+	// was unable to get it during crawling
 
 	// Only available when requesting from /beatmapsets endpoint
 	PackTags *[]string `json:"pack_tags"`

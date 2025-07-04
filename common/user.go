@@ -1,5 +1,7 @@
 package common
 
+import "time"
+
 type User struct {
 	AvatarURL string `json:"avatar_url"`
 	CountryCode string `json:"country_code"`
