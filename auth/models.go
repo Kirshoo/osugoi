@@ -17,6 +17,7 @@ type Authenticator interface {
 // PS. This is quite similar to golang.com/x/oauth2
 type TokenSource interface {
 	Token() (*Token, error)
+	RemoveToken()
 }
 
 type AuthorizationCodeConfig struct {

@@ -66,7 +66,13 @@ func (t *Transport) NewRequest(ctx context.Context, method, path string, body an
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	if token, err := t.tokenSource.Token(); err == nil {
+
+	token, err := t.tokenSource.Token();
+	if err != nil {
+		return nil, fmt.Errorf("request token: %w", err)
+	}
+
+	if token != nil {
 		req.Header.Set("Authorization", token.Type + " " + token.AccessToken)
 	}
 
@@ -119,5 +125,6 @@ func (t *Transport) RevokeToken() error {
 		return fmt.Errorf("performing request: %w", err)
 	}
 
+	t.tokenSource.RemoveToken()
 	return nil
 }

@@ -9,20 +9,28 @@ type TokenManager struct {
 	config Authenticator
 }
 
-func NewTokenManager(cfg Authenticator) (*TokenManager, error) {
+func NewTokenManager(token *Token, cfg Authenticator) *TokenManager {
+	return &TokenManager{
+		token: token,
+		config: cfg,
+	}
+}
+
+func NewTokenManagerWithAuthorization(cfg Authenticator) (*TokenManager, error) {
 	token, err := cfg.Token()
 	if err != nil {
 		return nil, fmt.Errorf("error requesting initial token: %w", err)
 	}
 
-	return &TokenManager{
-		token: token,
-		config: cfg,
-	}, nil
+	return NewTokenManager(token, cfg), nil
 }
 
 func (tm *TokenManager) Token() (*Token, error) {
-	if tm.token.IsExpired() {
+	if tm.token == nil {
+		return nil, fmt.Errorf("authorization token is abscent or revoked")
+	}
+
+	if !tm.token.IsExpired() {
 		return tm.token, nil
 	}
 
@@ -33,4 +41,8 @@ func (tm *TokenManager) Token() (*Token, error) {
 
 	tm.token = newToken
 	return tm.token, nil
+}
+
+func (tm *TokenManager) RemoveToken() {
+	tm.token = nil
 }
