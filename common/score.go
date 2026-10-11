@@ -77,7 +77,7 @@ type Score struct {
 
 	// Currently not documented types :/
 	MaximumStatistics MaximumStatistics `json:"maximum_statistics"`
-	Mods []Mod `json:"mods"`
+	Mods []interface{} `json:"mods"` // TODO: Will be a string or a struct depending on the endpoint
 	Statistics Statistics `json:"statistics"`
 	
 	// Legacy fields
