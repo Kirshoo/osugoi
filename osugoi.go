@@ -8,6 +8,7 @@ import (
 	"github.com/Kirshoo/osugoi/beatmapsets"
 	"github.com/Kirshoo/osugoi/events"
 	"github.com/Kirshoo/osugoi/scores"
+	"github.com/Kirshoo/osugoi/users"
 )
 
 // Represents an API client
@@ -21,6 +22,7 @@ type Client struct {
 	Beatmapsets *beatmapsets.BeatmapsetService
 	Events *events.EventService
 	Scores *scores.ScoreService
+	Users *users.UserService
 }
 
 // TODO: Simplify token config creation.
@@ -36,6 +38,7 @@ func NewClient(baseURL string, tokenSource auth.TokenSource, opts ...transport.T
 		Beatmapsets: &beatmapsets.BeatmapsetService{Transport: trans},
 		Events: &events.EventService{Transport: trans},
 		Scores: &scores.ScoreService{Transport: trans},
+		Users: &users.UserService{Transport: trans},
 	}
 }
 

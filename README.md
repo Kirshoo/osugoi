@@ -58,7 +58,7 @@ replace github.com/Kirshoo/osugoi => path/to/cloned/repo
 [!] Download beatmapset (This is osu!lazer specific and you cannot access this endpoint normally)  
 
 ### Events
-[x] List Events
+[x] List Events  
 [x] Optional query parameters
 
 ### OAuth tokens
@@ -72,11 +72,11 @@ replace github.com/Kirshoo/osugoi => path/to/cloned/repo
 [x] Optional query parameters  
 
 ### Users
-[ ] Get Own Data  
-[ ] Get User Kudosu  
-[ ] Get User Scores  
-[ ] Get User Beatmaps  
-[ ] Get User recent activity  
-[ ] Get User  
+[x] Get Own Data  
+[x] Get User Kudosu  
+[x] Get User Scores  
+[x] Get User Beatmaps  
+[x] Get User recent activity  
+[x] Get User  
 [ ] Get Users  
 [ ] Optional query parameters  
