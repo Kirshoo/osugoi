@@ -1,8 +1,7 @@
-package events
+package common
 
 import (
 	"time"
-	"github.com/Kirshoo/osugoi/common"
 )
 
 type AchievementEvent struct {
@@ -10,7 +9,7 @@ type AchievementEvent struct {
 	Name string `json:"name"`
 	Description string `json:"description"`
 	Instructions *string `json:"instructions"`
-	Mode *common.Ruleset `json:"mode"`
+	Mode *Ruleset `json:"mode"`
 	Ordering int `json:"ordering"`
 	Grouping string `json:"grouping"`
 	Slug string `json:"slug"`
@@ -36,7 +35,7 @@ type BeatmapsetEvent struct {
 type RankEvent struct {
 	ScoreRank string `json:"scoreRank"`
 	Rank int `json:"rank"`
-	Mode common.Ruleset `json:"mode"`
+	Mode Ruleset `json:"mode"`
 }
 
 type Event struct {
