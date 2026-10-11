@@ -41,6 +41,7 @@ type RankEvent struct {
 type Event struct {
 	CreatedAt time.Time `json:"created_at"`
 	Id int `json:"id"`
+	Type interface{} `json:"type"`
 
 	Achievement *AchievementEvent `json:"achievement"`
 	*RankEvent
