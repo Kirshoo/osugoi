@@ -24,13 +24,6 @@ type DifficultyAttributes struct {
 	TaikoDifficultyAttributes
 }
 
-type BeatmapPlaycount struct {
-	BeatmapId int `json:"beatmap_id"`
-	Beatmap *common.Beatmap `json:"beatmap"`
-	//Beatmapset *common.Beatmapset `json:"beatmapset"`
-	Count int `json:"count"`
-}
-
 type BeatmapUserScore struct {
 	Position int `json:"position"`
 	Score common.Score `json:"score"`

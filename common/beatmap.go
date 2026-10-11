@@ -64,3 +64,10 @@ type BeatmapExtended struct {
 func (e *BeatmapExtended) IsExtended() bool {
 	return e.LastUpdatedAt.IsZero()
 }
+
+type BeatmapPlaycount struct {
+	BeatmapId int `json:"beatmap_id"`
+	Beatmap *Beatmap `json:"beatmap"`
+	Beatmapset *Beatmapset `json:"beatmapset"`
+	Count int `json:"count"`
+}
